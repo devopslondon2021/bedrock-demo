@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Recorder & Transcriber</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .recording {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-3xl font-bold text-center mb-8">Voice Recorder & Transcriber</h1>
+            
+            <div class="flex flex-col items-center space-y-6">
+                <!-- Record Button -->
+                <button id="recordButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-full text-xl focus:outline-none transition-all duration-200">
+                    Start Recording
+                </button>
+                
+                <!-- Stop Button (initially hidden) -->
+                <button id="stopButton" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-8 rounded-full text-xl focus:outline-none transition-all duration-200">
+                    Stop Recording
+                </button>
+                
+                <!-- Status -->
+                <div id="status" class="text-gray-600 text-lg"></div>
+                
+                <!-- Results Section -->
+                <div id="results" class="w-full space-y-4 hidden">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h2 class="font-semibold text-lg mb-2">Transcript:</h2>
+                        <p id="transcript" class="text-gray-700"></p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h2 class="font-semibold text-lg mb-2">Links:</h2>
+                        <div class="space-y-2">
+                            <p>Audio: <a id="audioLink" class="text-blue-500 hover:underline" target="_blank"></a></p>
+                            <p>Transcript: <a id="transcriptLink" class="text-blue-500 hover:underline" target="_blank"></a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ws = new WebSocket(`ws://${window.location.host}/ws`);
+        const recordButton = document.getElementById('recordButton');
+        const stopButton = document.getElementById('stopButton');
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
+        const transcript = document.getElementById('transcript');
+        const audioLink = document.getElementById('audioLink');
+        const transcriptLink = document.getElementById('transcriptLink');
+
+        ws.onopen = () => {
+            console.log('Connected to WebSocket');
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            
+            if (data.status === 'recording_started') {
+                status.textContent = 'Recording in progress...';
+                recordButton.classList.add('hidden');
+                stopButton.classList.remove('hidden');
+                results.classList.add('hidden');
+            } else if (data.status === 'recording_stopped') {
+                status.textContent = 'Recording stopped. Uploading to S3...';
+            } else if (data.status === 'transcribing') {
+                status.textContent = 'Transcribing audio using Amazon Transcribe...';
+            } else if (data.status === 'success') {
+                // Show results
+                status.textContent = 'Transcription complete!';
+                results.classList.remove('hidden');
+                transcript.textContent = data.transcript;
+                audioLink.href = data.audio_uri;
+                audioLink.textContent = data.audio_uri;
+                transcriptLink.href = data.transcript_uri;
+                transcriptLink.textContent = data.transcript_uri;
+                
+                // Reset buttons
+                stopButton.classList.add('hidden');
+                recordButton.classList.remove('hidden');
+            } else if (data.status === 'error') {
+                status.textContent = `Error: ${data.message}`;
+                stopButton.classList.add('hidden');
+                recordButton.classList.remove('hidden');
+            }
+        };
+
+        ws.onclose = () => {
+            status.textContent = 'Connection closed';
+            stopButton.classList.add('hidden');
+            recordButton.classList.remove('hidden');
+        };
+
+        recordButton.addEventListener('click', () => {
+            ws.send(JSON.stringify({ action: 'start_recording' }));
+        });
+
+        stopButton.addEventListener('click', () => {
+            ws.send(JSON.stringify({ action: 'stop_recording' }));
+            stopButton.classList.add('hidden');
+            recordButton.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html> 
