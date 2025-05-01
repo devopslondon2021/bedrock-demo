@@ -40,8 +40,8 @@ cp .env.example .env
 
 6. Edit `.env` with your details:
 ```
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_ACCESS_KEY_ID=your_access_key_id
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
 AWS_REGION=us-east-1
 S3_BUCKET_NAME=your-bucket-name
 ```
@@ -80,4 +80,83 @@ python voice_recorder.py
 - The demo records in mono audio at 44.1kHz
 - Audio files and transcripts are stored with timestamps in their filenames
 - Temporary audio files are automatically cleaned up
-- Default recording duration is 10 seconds (can be modified in main()) 
+- Default recording duration is 10 seconds (can be modified in main())
+
+# Bedrock Car Sales Integration
+
+## Environment Setup
+
+### Google Sheets Integration
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Google Sheets API:
+   - Go to "APIs & Services" > "Library"
+   - Search for "Google Sheets API"
+   - Click "Enable"
+
+4. Create Service Account:
+   - Go to "APIs & Services" > "Credentials"
+   - Click "Create Credentials" > "Service Account"
+   - Fill in the service account details:
+     - Name: e.g., "Bedrock Sheets Service"
+     - ID: will be auto-generated
+     - Description: optional
+   - Click "Create and Continue"
+   - For "Grant this service account access to project", select:
+     - Role: "Editor" (for full access to sheets)
+   - Click "Done"
+
+5. Create and download service account key:
+   - Click on the newly created service account
+   - Go to "Keys" tab
+   - Click "Add Key" > "Create new key"
+   - Choose "JSON" format
+   - Click "Create"
+   - The key file will be downloaded automatically
+   - Save it as `service-account.json` in your project directory
+
+6. Create a Google Sheet:
+   - Go to [Google Sheets](https://sheets.google.com)
+   - Create a new spreadsheet
+   - Copy the spreadsheet ID from the URL:
+     - URL format: `https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit`
+   - Share the spreadsheet with the service account email (found in your service-account.json)
+
+7. Update your `.env` file:
+```bash
+# Google Sheets Settings
+GOOGLE_SERVICE_ACCOUNT_FILE=service-account.json
+GOOGLE_SPREADSHEET_ID=your_spreadsheet_id
+```
+
+### Required Environment Variables
+Copy `.env.example` to `.env` and fill in your values:
+
+```bash
+# AWS Settings
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your_access_key_id
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+
+# S3 Settings
+S3_BUCKET=your_bucket_name
+S3_RECORDINGS_PREFIX=recordings/
+S3_TRANSCRIPTS_PREFIX=transcripts/
+
+# Google Sheets Settings
+GOOGLE_SERVICE_ACCOUNT_FILE=service-account.json
+GOOGLE_SPREADSHEET_ID=your_spreadsheet_id
+
+# LLM Settings
+BEDROCK_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0
+
+# Application Settings
+DEBUG=False
+```
+
+### Security Notes
+- Never commit your `.env` file or service account key to version control
+- Keep your credentials secure and rotate them regularly
+- Use appropriate IAM roles and permissions for AWS services
+- Store the service account key file securely and reference it in your `.env` file

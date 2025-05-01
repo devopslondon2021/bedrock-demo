@@ -12,15 +12,28 @@ import json
 import time
 import base64
 import requests
+from app.core.config import get_settings
 
 class VoiceRecorder:
     def __init__(self):
+        self.settings = get_settings()
         self.sample_rate = 44100  # Sample rate in Hz
         self.channels = 1  # Mono audio
-        self.s3_client = boto3.client('s3')
-        self.transcribe = boto3.client('transcribe')
-        self.bucket_name = os.getenv('S3_BUCKET_NAME')
         self.recording = False
+        self.stream = None
+        self.frames = []
+        
+        # Initialize AWS clients
+        self.s3_client = boto3.client('s3',
+            aws_access_key_id=self.settings.aws_access_key_id,
+            aws_secret_access_key=self.settings.aws_secret_access_key,
+            region_name=self.settings.aws_region
+        )
+        
+        self.bucket_name = self.settings.s3_bucket
+        self.recordings_prefix = self.settings.s3_recordings_prefix
+        self.transcripts_prefix = self.settings.s3_transcripts_prefix
+        self.transcribe = boto3.client('transcribe')
         self.audio_queue = queue.Queue()
 
     def record_audio(self):
@@ -56,7 +69,7 @@ class VoiceRecorder:
     def upload_to_s3(self, file_path, object_name=None):
         """Upload file to S3 bucket"""
         if object_name is None:
-            object_name = f"recordings/{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+            object_name = f"{self.recordings_prefix}{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
         
         try:
             self.s3_client.upload_file(file_path, self.bucket_name, object_name)
@@ -101,7 +114,7 @@ class VoiceRecorder:
     def save_transcript_to_s3(self, transcript, object_name=None):
         """Save transcript to S3"""
         if object_name is None:
-            object_name = f"transcripts/{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            object_name = f"{self.transcripts_prefix}{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
         
         try:
             self.s3_client.put_object(

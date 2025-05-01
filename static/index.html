@@ -27,26 +27,128 @@
                     Start Recording
                 </button>
                 
+                <!-- Example Script -->
+                <div class="text-gray-400 text-sm text-center max-w-lg">
+                    <p class="italic">Example script:</p>
+                    <p class="mt-2">
+                        "Hi, my first name is __, my middle name is __, and my last name is __. 
+                        My date of birth is __. I'm interested in a car make __ and model __. 
+                        My post code is __."
+                    </p>
+                </div>
+                
                 <!-- Stop Button (initially hidden) -->
                 <button id="stopButton" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-8 rounded-full text-xl focus:outline-none transition-all duration-200">
                     Stop Recording
                 </button>
                 
                 <!-- Status -->
-                <div id="status" class="text-gray-600 text-lg"></div>
+                <div id="status" class="text-gray-600 text-lg">
+                    <!-- Add progress indicator -->
+                    <div id="progressIndicator" class="hidden mt-4">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- Results Section -->
                 <div id="results" class="w-full space-y-4 hidden">
+                    <!-- Transcript Section -->
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h2 class="font-semibold text-lg mb-2">Transcript:</h2>
-                        <p id="transcript" class="text-gray-700"></p>
+                        <h2 class="font-semibold text-lg mb-2 text-blue-700">Transcript</h2>
+                        <p id="transcript" class="text-gray-700 whitespace-pre-wrap"></p>
                     </div>
                     
+                    <!-- Links Section -->
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h2 class="font-semibold text-lg mb-2">Links:</h2>
+                        <h2 class="font-semibold text-lg mb-2 text-blue-700">Recording & Transcript Links</h2>
                         <div class="space-y-2">
-                            <p>Audio: <a id="audioLink" class="text-blue-500 hover:underline" target="_blank"></a></p>
-                            <p>Transcript: <a id="transcriptLink" class="text-blue-500 hover:underline" target="_blank"></a></p>
+                            <div class="flex items-center">
+                                <span class="font-medium mr-2">Audio Recording:</span>
+                                <a id="audioLink" class="text-blue-500 hover:underline break-all" target="_blank"></a>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="font-medium mr-2">Transcript File:</span>
+                                <a id="transcriptLink" class="text-blue-500 hover:underline break-all" target="_blank"></a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Analysis Section -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h2 class="font-semibold text-lg mb-4 text-blue-700">Analysis Results</h2>
+                        
+                        <!-- Extracted Information -->
+                        <div class="space-y-4">
+                            <!-- Customer Details -->
+                            <div class="border-b pb-3">
+                                <h3 class="font-medium text-gray-800 mb-2">Customer Details</h3>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="font-medium">First Name:</span>
+                                        <span id="firstName" class="ml-2 text-gray-700"></span>
+                                        <span id="firstNameConfidence" class="ml-2 text-sm text-blue-600"></span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Middle Name:</span>
+                                        <span id="middleName" class="ml-2 text-gray-700"></span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Last Name:</span>
+                                        <span id="lastName" class="ml-2 text-gray-700"></span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Date of Birth:</span>
+                                        <span id="dob" class="ml-2 text-gray-700"></span>
+                                        <span id="dobConfidence" class="ml-2 text-sm text-blue-600"></span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Post Code:</span>
+                                        <span id="postCode" class="ml-2 text-gray-700"></span>
+                                        <span id="postCodeConfidence" class="ml-2 text-sm text-blue-600"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Vehicle Information -->
+                            <div class="border-b pb-3">
+                                <h3 class="font-medium text-gray-800 mb-2">Vehicle Information</h3>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="font-medium">Make:</span>
+                                        <span id="carMake" class="ml-2 text-gray-700"></span>
+                                        <span id="vehicleConfidence" class="ml-2 text-sm text-blue-600"></span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium">Model:</span>
+                                        <span id="carModel" class="ml-2 text-gray-700"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Missing Fields -->
+                            <div class="border-b pb-3">
+                                <h3 class="font-medium text-gray-800 mb-2">Missing Information</h3>
+                                <div id="missingFields" class="text-red-600 space-y-1"></div>
+                            </div>
+                            
+                            <!-- Anomalies/Issues -->
+                            <div>
+                                <h3 class="font-medium text-gray-800 mb-2">Potential Issues/Anomalies</h3>
+                                <ul id="ambiguities" class="text-orange-600 space-y-1 list-disc pl-4"></ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sheet Submission Status -->
+                    <div id="sheetStatus" class="bg-gray-50 p-4 rounded-lg">
+                        <h2 class="font-semibold text-lg mb-2 text-blue-700">Submission Status</h2>
+                        
+                        <!-- Excel Status -->
+                        <div class="mb-3">
+                            <h3 class="font-medium text-gray-800 mb-1">Excel File Status:</h3>
+                            <p id="excelStatusText" class="text-gray-700"></p>
                         </div>
                     </div>
                 </div>
@@ -70,33 +172,146 @@
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
+            const progressIndicator = document.getElementById('progressIndicator');
+            const progressBar = document.getElementById('progressBar');
+            
+            const updateProgress = (percentage) => {
+                if (progressIndicator && progressBar) {
+                    progressIndicator.classList.remove('hidden');
+                    progressBar.style.width = `${percentage}%`;
+                }
+            };
             
             if (data.status === 'recording_started') {
                 status.textContent = 'Recording in progress...';
                 recordButton.classList.add('hidden');
                 stopButton.classList.remove('hidden');
                 results.classList.add('hidden');
+                if (progressIndicator) {
+                    progressIndicator.classList.add('hidden');
+                }
             } else if (data.status === 'recording_stopped') {
-                status.textContent = 'Recording stopped. Uploading to S3...';
+                status.textContent = 'Processing: Uploading recording to S3...';
+                updateProgress(20);
             } else if (data.status === 'transcribing') {
-                status.textContent = 'Transcribing audio using Amazon Transcribe...';
+                status.textContent = 'Processing: Transcribing audio using Amazon Transcribe...';
+                updateProgress(40);
+            } else if (data.status === 'analyzing') {
+                status.textContent = 'Processing: Analyzing transcript with AI...';
+                updateProgress(60);
             } else if (data.status === 'success') {
                 // Show results
-                status.textContent = 'Transcription complete!';
+                status.textContent = 'Analysis complete!';
+                updateProgress(100);
                 results.classList.remove('hidden');
-                transcript.textContent = data.transcript;
-                audioLink.href = data.audio_uri;
-                audioLink.textContent = data.audio_uri;
-                transcriptLink.href = data.transcript_uri;
-                transcriptLink.textContent = data.transcript_uri;
+                
+                // Update transcript
+                transcript.textContent = data.transcript || 'No transcript available';
+                
+                // Update links with better formatting
+                if (data.audio_uri) {
+                    audioLink.href = data.audio_uri;
+                    audioLink.textContent = 'Click to listen to recording';
+                } else {
+                    audioLink.textContent = 'Not available';
+                    audioLink.removeAttribute('href');
+                }
+                
+                if (data.transcript_uri) {
+                    transcriptLink.href = data.transcript_uri;
+                    transcriptLink.textContent = 'Click to view transcript file';
+                } else {
+                    transcriptLink.textContent = 'Not available';
+                    transcriptLink.removeAttribute('href');
+                }
+                
+                // Update analysis with detailed information
+                if (data.analysis) {
+                    // Customer Details with confidence scores
+                    document.getElementById('firstName').textContent = data.analysis.customer.first_name || 'Not provided';
+                    document.getElementById('middleName').textContent = data.analysis.customer.middle_name || 'Not provided';
+                    document.getElementById('lastName').textContent = data.analysis.customer.last_name || 'Not provided';
+                    document.getElementById('dob').textContent = data.analysis.date_of_birth || 'Not provided';
+                    document.getElementById('postCode').textContent = data.analysis.post_code || 'Not provided';
+                    
+                    // Add confidence scores if available
+                    if (data.analysis.confidence_scores) {
+                        document.getElementById('firstNameConfidence').textContent = 
+                            `(${data.analysis.confidence_scores.name}% confidence)`;
+                        document.getElementById('dobConfidence').textContent = 
+                            `(${data.analysis.confidence_scores.dob}% confidence)`;
+                        document.getElementById('postCodeConfidence').textContent = 
+                            `(${data.analysis.confidence_scores.post_code}% confidence)`;
+                        document.getElementById('vehicleConfidence').textContent = 
+                            `(${data.analysis.confidence_scores.vehicle}% confidence)`;
+                    }
+                    
+                    // Vehicle Details
+                    document.getElementById('carMake').textContent = data.analysis.vehicle.make || 'Not provided';
+                    document.getElementById('carModel').textContent = data.analysis.vehicle.model || 'Not provided';
+                    
+                    // Missing Fields
+                    const missingFields = document.getElementById('missingFields');
+                    if (data.analysis.missing_fields && data.analysis.missing_fields.length > 0) {
+                        missingFields.innerHTML = data.analysis.missing_fields.map(field => 
+                            `<p>• ${field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>`
+                        ).join('');
+                    } else {
+                        missingFields.innerHTML = '<p class="text-green-600">All required fields provided</p>';
+                    }
+                    
+                    // Anomalies/Issues
+                    const ambiguities = document.getElementById('ambiguities');
+                    if (data.analysis.ambiguities && data.analysis.ambiguities.length > 0) {
+                        ambiguities.innerHTML = data.analysis.ambiguities.map(issue => 
+                            `<li>${issue}</li>`
+                        ).join('');
+                    } else {
+                        ambiguities.innerHTML = '<li class="text-green-600">No issues found</li>';
+                    }
+                } else {
+                    // Handle case when no analysis is available
+                    const fields = ['firstName', 'middleName', 'lastName', 'dob', 'postCode', 'carMake', 'carModel'];
+                    fields.forEach(field => {
+                        document.getElementById(field).textContent = 'Analysis not available';
+                    });
+                    document.getElementById('missingFields').innerHTML = '<p>Analysis not available</p>';
+                    document.getElementById('ambiguities').innerHTML = '<li>Analysis not available</li>';
+                }
+                
+                // Update submission status
+                const sheetStatus = document.getElementById('sheetStatus');
+                const excelStatusText = document.getElementById('excelStatusText');
+                
+                sheetStatus.classList.remove('hidden');
+                
+                // Update Excel status
+                if (data.excel_submitted) {
+                    excelStatusText.textContent = 'Successfully saved to Excel file in S3';
+                    excelStatusText.className = 'text-green-600 font-medium';
+                } else {
+                    excelStatusText.textContent = 'Failed to save to Excel file - Please check the logs';
+                    excelStatusText.className = 'text-red-600 font-medium';
+                }
                 
                 // Reset buttons
                 stopButton.classList.add('hidden');
                 recordButton.classList.remove('hidden');
+                
+                // Hide progress indicator after a delay
+                setTimeout(() => {
+                    if (progressIndicator) {
+                        progressIndicator.classList.add('hidden');
+                    }
+                }, 2000);
             } else if (data.status === 'error') {
                 status.textContent = `Error: ${data.message}`;
+                status.className = 'text-red-600 text-lg font-medium';
                 stopButton.classList.add('hidden');
                 recordButton.classList.remove('hidden');
+                if (progressIndicator) {
+                    progressIndicator.classList.add('hidden');
+                }
             }
         };
 
@@ -112,6 +327,7 @@
 
         stopButton.addEventListener('click', () => {
             ws.send(JSON.stringify({ action: 'stop_recording' }));
+            status.textContent = 'Processing...';
             stopButton.classList.add('hidden');
             recordButton.classList.remove('hidden');
         });
